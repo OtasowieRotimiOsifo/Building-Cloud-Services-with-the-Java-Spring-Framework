@@ -17,10 +17,74 @@
  */
 package org.magnum.dataup;
 
+import java.io.IOException;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.magnum.config.PropertiesUtility;
+import org.magnum.dataup.model.Video;
+import org.magnum.dataup.model.VideoStatus;
+
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import retrofit.client.Response;
+import retrofit.mime.TypedFile;
+
 
 @Controller
-public class AnEmptyController {
+public class VideoFilesController  implements HandlerExceptionResolver,  VideoSvcApi {
+
+	@Autowired
+	PropertiesUtility propertiesUtility;
+	
+	VideoFileManager videoFileManager = VideoFileManager.get();
+	
+	public VideoFilesController() throws IOException {}
+	
+	@Override
+	public ModelAndView resolveException( //Baeldung
+	  HttpServletRequest request,
+	  HttpServletResponse response, 
+	  Object object,
+	  Exception exc) {   
+	     
+	    ModelAndView modelAndView = new ModelAndView("result");
+	    String max_size = propertiesUtility.getProperty("spring.servlet.multipart.max-request-size");
+	    if (exc instanceof MaxUploadSizeExceededException) {
+	        modelAndView.getModel().put("uploadError", "File size exceeds limit configure limit of: " + max_size);
+	    }
+	    return modelAndView;
+	}
+
+	@Override
+	public Collection<Video> getVideoList() {
+		
+		return null; //videoFileManager.;
+	}
+
+	@Override
+	public Video addVideo(Video v) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public VideoStatus setVideoData(long id, TypedFile videoData) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Response getData(long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/**
 	 * You will need to create one or more Spring controllers to fulfill the
