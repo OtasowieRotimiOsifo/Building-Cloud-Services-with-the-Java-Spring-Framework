@@ -17,90 +17,69 @@
  */
 package org.magnum.dataup;
 
-import java.io.IOException;
-import java.util.Collection;
+/**
+ * You will need to create one or more Spring controllers to fulfill the
+ * requirements of the assignment. If you use this file, please rename it
+ * to something other than "AnEmptyController"
+ * 
+ * 
+	 ________  ________  ________  ________          ___       ___  ___  ________  ___  __       
+	|\   ____\|\   __  \|\   __  \|\   ___ \        |\  \     |\  \|\  \|\   ____\|\  \|\  \     
+	\ \  \___|\ \  \|\  \ \  \|\  \ \  \_|\ \       \ \  \    \ \  \\\  \ \  \___|\ \  \/  /|_   
+	 \ \  \  __\ \  \\\  \ \  \\\  \ \  \ \\ \       \ \  \    \ \  \\\  \ \  \    \ \   ___  \  
+	  \ \  \|\  \ \  \\\  \ \  \\\  \ \  \_\\ \       \ \  \____\ \  \\\  \ \  \____\ \  \\ \  \ 
+	   \ \_______\ \_______\ \_______\ \_______\       \ \_______\ \_______\ \_______\ \__\\ \__\
+	    \|_______|\|_______|\|_______|\|_______|        \|_______|\|_______|\|_______|\|__| \|__|
+                                                                                                                                                                                                                                                                    
+ * 
+ */
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 
 import org.magnum.config.PropertiesUtility;
 import org.magnum.dataup.model.Video;
-import org.magnum.dataup.model.VideoStatus;
-
+import org.magnum.repository.VideoRepository;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.google.common.collect.Lists;
 
 import retrofit.client.Response;
-import retrofit.mime.TypedFile;
+import retrofit.http.GET;
+import retrofit.http.Path;
+import retrofit.http.Streaming;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 
 @Controller
-public class VideoFilesController  implements HandlerExceptionResolver,  VideoSvcApi {
+public class VideoFilesController {
 
 	@Autowired
 	PropertiesUtility propertiesUtility;
 	
-	VideoFileManager videoFileManager = VideoFileManager.get();
-	
-	public VideoFilesController() throws IOException {}
-	
-	@Override
-	public ModelAndView resolveException( //Baeldung
-	  HttpServletRequest request,
-	  HttpServletResponse response, 
-	  Object object,
-	  Exception exc) {   
-	     
-	    ModelAndView modelAndView = new ModelAndView("result");
-	    String max_size = propertiesUtility.getProperty("spring.servlet.multipart.max-request-size");
-	    if (exc instanceof MaxUploadSizeExceededException) {
-	        modelAndView.getModel().put("uploadError", "File size exceeds limit configure limit of: " + max_size);
-	    }
-	    return modelAndView;
-	}
+	@Autowired
+	private VideoRepository repository;
 
-	@Override
-	public Collection<Video> getVideoList() {
-		
-		return null; //videoFileManager.;
+	@RequestMapping(value=VideoSvcApi.VIDEO_SVC_PATH, method=RequestMethod.GET)
+	public @ResponseBody Collection<Video> getVideoList(){
+		return Lists.newArrayList(repository.findAll());
 	}
-
-	@Override
-	public Video addVideo(Video v) {
-		// TODO Auto-generated method stub
+	
+	@RequestMapping(value=VideoSvcApi.VIDEO_SVC_PATH, method=RequestMethod.POST)
+	public @ResponseBody boolean addVideo(@RequestBody Video v){
+		 repository.save(v);
+		 return true;
+	}
+	
+	@Streaming
+    @GET(VideoSvcApi.VIDEO_DATA_PATH)
+    Response getData(@Path(VideoSvcApi.ID_PARAMETER) long id) {
 		return null;
 	}
-
-	@Override
-	public VideoStatus setVideoData(long id, TypedFile videoData) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Response getData(long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * You will need to create one or more Spring controllers to fulfill the
-	 * requirements of the assignment. If you use this file, please rename it
-	 * to something other than "AnEmptyController"
-	 * 
-	 * 
-		 ________  ________  ________  ________          ___       ___  ___  ________  ___  __       
-		|\   ____\|\   __  \|\   __  \|\   ___ \        |\  \     |\  \|\  \|\   ____\|\  \|\  \     
-		\ \  \___|\ \  \|\  \ \  \|\  \ \  \_|\ \       \ \  \    \ \  \\\  \ \  \___|\ \  \/  /|_   
-		 \ \  \  __\ \  \\\  \ \  \\\  \ \  \ \\ \       \ \  \    \ \  \\\  \ \  \    \ \   ___  \  
-		  \ \  \|\  \ \  \\\  \ \  \\\  \ \  \_\\ \       \ \  \____\ \  \\\  \ \  \____\ \  \\ \  \ 
-		   \ \_______\ \_______\ \_______\ \_______\       \ \_______\ \_______\ \_______\ \__\\ \__\
-		    \|_______|\|_______|\|_______|\|_______|        \|_______|\|_______|\|_______|\|__| \|__|
-                                                                                                                                                                                                                                                                        
-	 * 
-	 */
-	
 }
